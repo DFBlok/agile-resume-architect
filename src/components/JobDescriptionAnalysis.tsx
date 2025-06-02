@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,12 +32,15 @@ export const JobDescriptionAnalysis = ({ resumeData }: JobDescriptionAnalysisPro
     const jobKeywords = extractKeywords(jobDesc.toLowerCase());
     const resumeText = getResumeText(resume).toLowerCase();
     
-    // Calculate match score
+    // Calculate match score with proper fallback
     const matchedKeywords = jobKeywords.filter(keyword => 
       resumeText.includes(keyword.toLowerCase())
     );
     
-    const matchScore = Math.round((matchedKeywords.length / jobKeywords.length) * 100);
+    // Prevent NaN by ensuring we have a valid calculation
+    const matchScore = jobKeywords.length > 0 
+      ? Math.round((matchedKeywords.length / jobKeywords.length) * 100)
+      : 0;
     
     // Generate suggestions
     const missingKeywords = jobKeywords.filter(keyword => 
@@ -57,16 +59,33 @@ export const JobDescriptionAnalysis = ({ resumeData }: JobDescriptionAnalysisPro
   };
 
   const extractKeywords = (text: string) => {
-    // Common technical and professional keywords
+    // Enhanced keyword extraction with more comprehensive list
     const commonKeywords = [
       'javascript', 'react', 'node.js', 'python', 'aws', 'docker', 'kubernetes',
       'project management', 'leadership', 'team collaboration', 'agile', 'scrum',
       'problem solving', 'communication', 'analytical', 'strategic planning',
       'data analysis', 'machine learning', 'artificial intelligence', 'sql',
-      'git', 'ci/cd', 'testing', 'debugging', 'optimization', 'scalability'
+      'git', 'ci/cd', 'testing', 'debugging', 'optimization', 'scalability',
+      'html', 'css', 'typescript', 'angular', 'vue', 'mongodb', 'postgresql',
+      'rest api', 'graphql', 'microservices', 'cloud computing', 'devops'
     ];
     
-    return commonKeywords.filter(keyword => text.includes(keyword));
+    // Also extract words that appear multiple times in the job description
+    const words = text.toLowerCase().match(/\b\w{3,}\b/g) || [];
+    const wordFreq: { [key: string]: number } = {};
+    
+    words.forEach(word => {
+      wordFreq[word] = (wordFreq[word] || 0) + 1;
+    });
+    
+    // Get frequently mentioned words (appeared 2+ times)
+    const frequentWords = Object.keys(wordFreq).filter(word => 
+      wordFreq[word] >= 2 && word.length > 3
+    );
+    
+    // Combine common keywords with frequent words from job description
+    const allKeywords = [...commonKeywords, ...frequentWords];
+    return allKeywords.filter(keyword => text.includes(keyword));
   };
 
   const getResumeText = (resume: any) => {
@@ -75,7 +94,7 @@ export const JobDescriptionAnalysis = ({ resumeData }: JobDescriptionAnalysisPro
     if (resume.personal?.summary) text += resume.personal.summary + ' ';
     if (resume.experience) {
       resume.experience.forEach((exp: any) => {
-        text += `${exp.position} ${exp.company} ${exp.description || ''} `;
+        text += `${exp.position || ''} ${exp.company || ''} ${exp.description || ''} `;
       });
     }
     if (resume.skills) {
@@ -83,7 +102,7 @@ export const JobDescriptionAnalysis = ({ resumeData }: JobDescriptionAnalysisPro
     }
     if (resume.education) {
       resume.education.forEach((edu: any) => {
-        text += `${edu.degree} ${edu.field} ${edu.institution} `;
+        text += `${edu.degree || ''} ${edu.field || ''} ${edu.institution || ''} `;
       });
     }
     

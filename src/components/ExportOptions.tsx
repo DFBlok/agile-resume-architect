@@ -1,6 +1,5 @@
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -41,16 +40,16 @@ export const ExportOptions = ({ resumeData }: ExportOptionsProps) => {
           Export Resume
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-48 bg-white border shadow-lg">
-        <DropdownMenuItem onClick={exportToPDF} className="cursor-pointer">
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={exportToPDF}>
           <FileText className="w-4 h-4 mr-2 text-red-500" />
           Export as PDF
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={exportToDOCX} className="cursor-pointer">
+        <DropdownMenuItem onClick={exportToDOCX}>
           <File className="w-4 h-4 mr-2 text-blue-500" />
           Export as DOCX
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={exportToHTML} className="cursor-pointer">
+        <DropdownMenuItem onClick={exportToHTML}>
           <Globe className="w-4 h-4 mr-2 text-orange-500" />
           Export as HTML
         </DropdownMenuItem>
