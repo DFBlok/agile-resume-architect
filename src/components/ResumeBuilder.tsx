@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,9 +12,10 @@ import { ExportOptions } from './ExportOptions';
 
 interface ResumeBuilderProps {
   onBack: () => void;
+  templateId?: string;
 }
 
-export const ResumeBuilder = ({ onBack }: ResumeBuilderProps) => {
+export const ResumeBuilder = ({ onBack, templateId = 'modern' }: ResumeBuilderProps) => {
   const [activeSection, setActiveSection] = useState('personal');
   const [showPreview, setShowPreview] = useState(false);
   const [resumeData, setResumeData] = useState({
@@ -41,11 +41,21 @@ export const ResumeBuilder = ({ onBack }: ResumeBuilderProps) => {
     }));
   };
 
+  const getTemplateName = (id: string) => {
+    const templates = {
+      modern: 'Modern Professional',
+      classic: 'Classic Traditional',
+      creative: 'Creative Design'
+    };
+    return templates[id as keyof typeof templates] || 'Modern Professional';
+  };
+
   if (showPreview) {
     return (
       <ResumePreview 
         resumeData={resumeData} 
-        onBack={() => setShowPreview(false)} 
+        onBack={() => setShowPreview(false)}
+        templateId={templateId}
       />
     );
   }
@@ -62,7 +72,9 @@ export const ResumeBuilder = ({ onBack }: ResumeBuilderProps) => {
             </Button>
             <div>
               <h1 className="text-3xl font-bold text-slate-800">Resume Builder</h1>
-              <p className="text-slate-600">Create your professional resume step by step</p>
+              <p className="text-slate-600">
+                Create your professional resume step by step • Template: {getTemplateName(templateId)}
+              </p>
             </div>
           </div>
           <div className="flex gap-2">

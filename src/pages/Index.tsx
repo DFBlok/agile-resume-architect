@@ -1,16 +1,36 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, FileText, Search, CheckCircle, Zap, Download, Brain } from "lucide-react";
 import { ResumeBuilder } from '@/components/ResumeBuilder';
+import { TemplateSelector } from '@/components/TemplateSelector';
 
 const Index = () => {
-  const [showBuilder, setShowBuilder] = useState(false);
+  const [currentView, setCurrentView] = useState<'home' | 'templates' | 'builder'>('home');
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('modern');
 
-  if (showBuilder) {
-    return <ResumeBuilder onBack={() => setShowBuilder(false)} />;
+  const handleSelectTemplate = (templateId: string) => {
+    setSelectedTemplate(templateId);
+    setCurrentView('builder');
+  };
+
+  if (currentView === 'builder') {
+    return (
+      <ResumeBuilder 
+        onBack={() => setCurrentView('home')} 
+        templateId={selectedTemplate}
+      />
+    );
+  }
+
+  if (currentView === 'templates') {
+    return (
+      <TemplateSelector 
+        onBack={() => setCurrentView('home')}
+        onSelectTemplate={handleSelectTemplate}
+      />
+    );
   }
 
   return (
@@ -32,13 +52,18 @@ const Index = () => {
           <div className="flex gap-4 justify-center">
             <Button 
               size="lg" 
-              onClick={() => setShowBuilder(true)}
+              onClick={() => setCurrentView('builder')}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 text-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
             >
               Start Building Resume
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
-            <Button variant="outline" size="lg" className="px-8 py-3 text-lg">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="px-8 py-3 text-lg"
+              onClick={() => setCurrentView('templates')}
+            >
               View Templates
             </Button>
           </div>

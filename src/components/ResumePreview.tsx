@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Mail, Phone, MapPin, Globe, Linkedin } from "lucide-react";
@@ -6,10 +5,34 @@ import { ArrowLeft, Mail, Phone, MapPin, Globe, Linkedin } from "lucide-react";
 interface ResumePreviewProps {
   resumeData: any;
   onBack: () => void;
+  templateId?: string;
 }
 
-export const ResumePreview = ({ resumeData, onBack }: ResumePreviewProps) => {
+export const ResumePreview = ({ resumeData, onBack, templateId = 'modern' }: ResumePreviewProps) => {
   const { personal = {}, experience = [], education = [], skills = [] } = resumeData;
+
+  const getTemplateStyles = (templateId: string) => {
+    const styles = {
+      modern: {
+        headerBg: 'bg-gradient-to-r from-slate-800 to-slate-900',
+        accentColor: 'border-blue-500',
+        skillBg: 'bg-blue-100 text-blue-800'
+      },
+      classic: {
+        headerBg: 'bg-slate-800',
+        accentColor: 'border-slate-600',
+        skillBg: 'bg-slate-100 text-slate-800'
+      },
+      creative: {
+        headerBg: 'bg-gradient-to-r from-purple-600 to-pink-600',
+        accentColor: 'border-purple-500',
+        skillBg: 'bg-purple-100 text-purple-800'
+      }
+    };
+    return styles[templateId as keyof typeof styles] || styles.modern;
+  };
+
+  const templateStyles = getTemplateStyles(templateId);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -24,10 +47,10 @@ export const ResumePreview = ({ resumeData, onBack }: ResumePreviewProps) => {
         {/* Resume Preview */}
         <Card className="max-w-4xl mx-auto shadow-2xl">
           <CardContent className="p-0">
-            {/* Modern Template */}
+            {/* Template-based Design */}
             <div className="bg-white">
               {/* Header */}
-              <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white p-8">
+              <div className={`${templateStyles.headerBg} text-white p-8`}>
                 <h1 className="text-4xl font-bold mb-2">
                   {personal.firstName} {personal.lastName}
                 </h1>
@@ -70,7 +93,7 @@ export const ResumePreview = ({ resumeData, onBack }: ResumePreviewProps) => {
                 {/* Professional Summary */}
                 {personal.summary && (
                   <section>
-                    <h2 className="text-2xl font-bold text-slate-800 mb-4 border-b-2 border-blue-500 pb-2">
+                    <h2 className={`text-2xl font-bold text-slate-800 mb-4 border-b-2 ${templateStyles.accentColor} pb-2`}>
                       Professional Summary
                     </h2>
                     <p className="text-slate-700 leading-relaxed">{personal.summary}</p>
@@ -80,12 +103,12 @@ export const ResumePreview = ({ resumeData, onBack }: ResumePreviewProps) => {
                 {/* Experience */}
                 {experience.length > 0 && (
                   <section>
-                    <h2 className="text-2xl font-bold text-slate-800 mb-4 border-b-2 border-blue-500 pb-2">
+                    <h2 className={`text-2xl font-bold text-slate-800 mb-4 border-b-2 ${templateStyles.accentColor} pb-2`}>
                       Professional Experience
                     </h2>
                     <div className="space-y-6">
                       {experience.map((exp: any, index: number) => (
-                        <div key={index} className="border-l-4 border-blue-500 pl-4">
+                        <div key={index} className={`border-l-4 ${templateStyles.accentColor} pl-4`}>
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <h3 className="text-xl font-semibold text-slate-800">{exp.position}</h3>
@@ -112,7 +135,7 @@ export const ResumePreview = ({ resumeData, onBack }: ResumePreviewProps) => {
                 {/* Education */}
                 {education.length > 0 && (
                   <section>
-                    <h2 className="text-2xl font-bold text-slate-800 mb-4 border-b-2 border-blue-500 pb-2">
+                    <h2 className={`text-2xl font-bold text-slate-800 mb-4 border-b-2 ${templateStyles.accentColor} pb-2`}>
                       Education
                     </h2>
                     <div className="space-y-4">
@@ -142,14 +165,14 @@ export const ResumePreview = ({ resumeData, onBack }: ResumePreviewProps) => {
                 {/* Skills */}
                 {skills.length > 0 && (
                   <section>
-                    <h2 className="text-2xl font-bold text-slate-800 mb-4 border-b-2 border-blue-500 pb-2">
+                    <h2 className={`text-2xl font-bold text-slate-800 mb-4 border-b-2 ${templateStyles.accentColor} pb-2`}>
                       Skills & Technologies
                     </h2>
                     <div className="flex flex-wrap gap-2">
                       {skills.map((skill: string, index: number) => (
                         <span
                           key={index}
-                          className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+                          className={`${templateStyles.skillBg} px-3 py-1 rounded-full text-sm font-medium`}
                         >
                           {skill}
                         </span>
