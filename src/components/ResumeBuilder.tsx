@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { SkillsForm } from './forms/SkillsForm';
 import { ResumePreview } from './ResumePreview';
 import { ATSScore } from './ATSScore';
 import { ExportOptions } from './ExportOptions';
+import { JobDescriptionAnalysis } from './JobDescriptionAnalysis';
 
 interface ResumeBuilderProps {
   onBack: () => void;
@@ -114,6 +116,9 @@ export const ResumeBuilder = ({ onBack, templateId = 'modern' }: ResumeBuilderPr
 
             {/* ATS Score Card */}
             <ATSScore resumeData={resumeData} />
+
+            {/* Job Description Analysis Card */}
+            <JobDescriptionAnalysis resumeData={resumeData} />
           </div>
 
           {/* Main Content */}
