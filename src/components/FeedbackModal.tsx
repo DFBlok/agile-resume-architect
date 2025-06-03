@@ -1,11 +1,11 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Star, ThumbsUp, ThumbsDown } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -16,17 +16,42 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [satisfaction, setSatisfaction] = useState<'good' | 'bad' | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    // In a real app, this would send feedback to your backend
-    console.log('Feedback submitted:', { rating, feedback, satisfaction });
-    toast.success("Thank you for your feedback! It helps us improve our AI resume builder.");
-    
-    // Reset form
-    setRating(0);
-    setFeedback('');
-    setSatisfaction(null);
-    onClose();
+  const handleSubmit = async () => {
+    if (!satisfaction && rating === 0) {
+      toast.error("Please provide at least a rating or satisfaction level");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('feedback')
+        .insert({
+          rating: rating > 0 ? rating : null,
+          satisfaction: satisfaction,
+          feedback_text: feedback.trim() || null
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success("Thank you for your feedback! It helps us improve our AI resume builder.");
+      
+      // Reset form
+      setRating(0);
+      setFeedback('');
+      setSatisfaction(null);
+      onClose();
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast.error("Failed to submit feedback. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -51,6 +76,7 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
                 variant={satisfaction === 'good' ? 'default' : 'outline'}
                 onClick={() => setSatisfaction('good')}
                 className="flex items-center gap-2"
+                disabled={isSubmitting}
               >
                 <ThumbsUp className="w-4 h-4" />
                 Yes
@@ -59,6 +85,7 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
                 variant={satisfaction === 'bad' ? 'default' : 'outline'}
                 onClick={() => setSatisfaction('bad')}
                 className="flex items-center gap-2"
+                disabled={isSubmitting}
               >
                 <ThumbsDown className="w-4 h-4" />
                 No
@@ -75,6 +102,7 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
                   key={star}
                   onClick={() => setRating(star)}
                   className="p-1 hover:scale-110 transition-transform"
+                  disabled={isSubmitting}
                 >
                   <Star
                     className={`w-6 h-6 ${
@@ -98,20 +126,26 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               className="min-h-[80px] resize-none"
+              disabled={isSubmitting}
             />
           </div>
 
           {/* Submit Button */}
           <div className="flex gap-3 pt-2">
-            <Button variant="outline" onClick={handleClose} className="flex-1">
+            <Button 
+              variant="outline" 
+              onClick={handleClose} 
+              className="flex-1"
+              disabled={isSubmitting}
+            >
               Skip
             </Button>
             <Button 
               onClick={handleSubmit} 
-              disabled={!satisfaction && rating === 0}
+              disabled={(!satisfaction && rating === 0) || isSubmitting}
               className="flex-1"
             >
-              Submit Feedback
+              {isSubmitting ? "Submitting..." : "Submit Feedback"}
             </Button>
           </div>
         </div>
