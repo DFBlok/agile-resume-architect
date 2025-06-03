@@ -43,15 +43,15 @@ export const ATSScore = ({ resumeData }: ATSScoreProps) => {
 
   const score = calculateATSScore();
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
-    return "text-red-600";
+    if (score >= 80) return "text-green-600 dark:text-green-400";
+    if (score >= 60) return "text-yellow-600 dark:text-yellow-400";
+    return "text-red-600 dark:text-red-400";
   };
 
   const getScoreStatus = (score: number) => {
-    if (score >= 80) return { label: "Excellent", color: "bg-green-100 text-green-800" };
-    if (score >= 60) return { label: "Good", color: "bg-yellow-100 text-yellow-800" };
-    return { label: "Needs Improvement", color: "bg-red-100 text-red-800" };
+    if (score >= 80) return { label: "Excellent", color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" };
+    if (score >= 60) return { label: "Good", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" };
+    return { label: "Needs Improvement", color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" };
   };
 
   const status = getScoreStatus(score);
@@ -65,10 +65,10 @@ export const ATSScore = ({ resumeData }: ATSScoreProps) => {
   ];
 
   return (
-    <Card className="mt-6">
+    <Card className="mt-6 relative z-10 bg-card dark:bg-card border-border dark:border-border">
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Target className="w-5 h-5 text-blue-600" />
+        <CardTitle className="text-lg flex items-center gap-2 text-foreground dark:text-foreground">
+          <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           ATS Score
         </CardTitle>
       </CardHeader>
@@ -82,18 +82,20 @@ export const ATSScore = ({ resumeData }: ATSScoreProps) => {
           </Badge>
         </div>
 
-        <Progress value={score} className="w-full" />
+        <div className="relative z-20">
+          <Progress value={score} className="w-full h-3" />
+        </div>
 
         <div className="space-y-2">
-          <h4 className="font-medium text-sm">Suggestions:</h4>
+          <h4 className="font-medium text-sm text-foreground dark:text-foreground">Suggestions:</h4>
           {suggestions.map((suggestion, index) => (
             <div key={index} className="flex items-center gap-2 text-sm">
               {suggestion.completed ? (
-                <CheckCircle className="w-4 h-4 text-green-500" />
+                <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400" />
               ) : (
-                <AlertCircle className="w-4 h-4 text-yellow-500" />
+                <AlertCircle className="w-4 h-4 text-yellow-500 dark:text-yellow-400" />
               )}
-              <span className={suggestion.completed ? "text-green-700" : "text-slate-600"}>
+              <span className={suggestion.completed ? "text-green-700 dark:text-green-300" : "text-slate-600 dark:text-slate-400"}>
                 {suggestion.text}
               </span>
             </div>
