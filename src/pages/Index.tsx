@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +6,7 @@ import { ArrowRight, FileText, Search, CheckCircle, Zap, Download, Brain } from 
 import { ResumeBuilder } from '@/components/ResumeBuilder';
 import { TemplateSelector } from '@/components/TemplateSelector';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { ContactSection } from '@/components/ContactSection';
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<'home' | 'templates' | 'builder'>('home');
@@ -160,6 +160,9 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Contact Section */}
+      <ContactSection />
     </div>
   );
 };

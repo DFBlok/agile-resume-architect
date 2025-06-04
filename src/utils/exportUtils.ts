@@ -1,20 +1,26 @@
 
 export const exportToPDF = async (resumeData: any) => {
   try {
-    // Create a simple HTML representation of the resume
+    // Note: This is a simplified implementation
+    // For real PDF generation, you would use libraries like jsPDF or Puppeteer
     const htmlContent = generateResumeHTML(resumeData);
     
-    // For now, we'll create a blob and download it
-    // In a real implementation, you'd use libraries like jsPDF or Puppeteer
+    // Create a blob with HTML content and suggest PDF printing
     const blob = new Blob([htmlContent], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${resumeData.personal?.firstName || 'resume'}_resume.html`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    
+    // Open in new window for PDF printing
+    const printWindow = window.open(url, '_blank');
+    if (printWindow) {
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+      };
+    }
+    
+    // Clean up
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     
     return true;
   } catch (error) {
@@ -25,14 +31,16 @@ export const exportToPDF = async (resumeData: any) => {
 
 export const exportToDOCX = async (resumeData: any) => {
   try {
-    // Create a simple text representation
-    const textContent = generateResumeText(resumeData);
+    // Create a proper Word document structure
+    const docContent = generateWordDocument(resumeData);
     
-    const blob = new Blob([textContent], { type: 'text/plain' });
+    const blob = new Blob([docContent], { 
+      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${resumeData.personal?.firstName || 'resume'}_resume.txt`;
+    link.download = `${resumeData.personal?.firstName || 'resume'}_resume.docx`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -66,6 +74,53 @@ export const exportToHTML = async (resumeData: any) => {
   }
 };
 
+const generateWordDocument = (resumeData: any) => {
+  const { personal, experience = [], education = [], skills = [] } = resumeData;
+  
+  // Create a basic RTF document that can be opened by Word
+  let rtfContent = `{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}`;
+  rtfContent += `\\f0\\fs24 `;
+  
+  // Header
+  rtfContent += `{\\b\\fs32 ${personal?.firstName || ''} ${personal?.lastName || ''}}\\par`;
+  rtfContent += `${personal?.email || ''} | ${personal?.phone || ''}\\par`;
+  rtfContent += `${personal?.address || ''}\\par\\par`;
+  
+  // Professional Summary
+  if (personal?.summary) {
+    rtfContent += `{\\b\\fs28 PROFESSIONAL SUMMARY}\\par`;
+    rtfContent += `${personal.summary}\\par\\par`;
+  }
+  
+  // Work Experience
+  if (experience.length > 0) {
+    rtfContent += `{\\b\\fs28 WORK EXPERIENCE}\\par`;
+    experience.forEach((exp: any) => {
+      rtfContent += `{\\b ${exp.position || ''}} at {\\b ${exp.company || ''}}\\par`;
+      rtfContent += `${exp.startDate || ''} - ${exp.endDate || 'Present'}\\par`;
+      rtfContent += `${exp.description || ''}\\par\\par`;
+    });
+  }
+  
+  // Education
+  if (education.length > 0) {
+    rtfContent += `{\\b\\fs28 EDUCATION}\\par`;
+    education.forEach((edu: any) => {
+      rtfContent += `{\\b ${edu.degree || ''}} in ${edu.field || ''}\\par`;
+      rtfContent += `${edu.institution || ''} (${edu.graduationYear || ''})\\par\\par`;
+    });
+  }
+  
+  // Skills
+  if (skills.length > 0) {
+    rtfContent += `{\\b\\fs28 SKILLS}\\par`;
+    rtfContent += `${skills.join(', ')}\\par`;
+  }
+  
+  rtfContent += `}`;
+  return rtfContent;
+};
+
 const generateResumeHTML = (resumeData: any) => {
   const { personal, experience = [], education = [], skills = [] } = resumeData;
   
@@ -77,20 +132,88 @@ const generateResumeHTML = (resumeData: any) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${personal?.firstName || ''} ${personal?.lastName || ''} - Resume</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
-        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
-        .section { margin-bottom: 30px; }
-        .section h2 { color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
-        .experience-item, .education-item { margin-bottom: 20px; }
-        .skills { display: flex; flex-wrap: wrap; gap: 10px; }
-        .skill { background: #f0f0f0; padding: 5px 10px; border-radius: 5px; }
+        body { 
+            font-family: 'Arial', sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 40px 20px; 
+            line-height: 1.6; 
+            color: #333;
+            background: white;
+        }
+        .header { 
+            text-align: center; 
+            border-bottom: 3px solid #2563eb; 
+            padding-bottom: 20px; 
+            margin-bottom: 30px; 
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: #1e40af;
+        }
+        .contact-info {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            color: #666;
+        }
+        .section { 
+            margin-bottom: 30px; 
+        }
+        .section h2 { 
+            color: #1e40af; 
+            border-bottom: 2px solid #ddd; 
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        .experience-item, .education-item { 
+            margin-bottom: 25px; 
+            padding-left: 20px;
+            border-left: 3px solid #e5e7eb;
+        }
+        .job-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #1f2937;
+        }
+        .company {
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .date-range {
+            color: #6b7280;
+            font-style: italic;
+            margin: 5px 0;
+        }
+        .skills { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 12px; 
+            margin-top: 15px;
+        }
+        .skill { 
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
+            color: white;
+            padding: 8px 16px; 
+            border-radius: 25px; 
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        @media print {
+            body { padding: 20px; }
+            .header { page-break-inside: avoid; }
+            .section { page-break-inside: avoid; }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>${personal?.firstName || ''} ${personal?.lastName || ''}</h1>
-        <p>${personal?.email || ''} | ${personal?.phone || ''}</p>
-        <p>${personal?.address || ''}</p>
+        <div class="contact-info">
+            <div>${personal?.email || ''} | ${personal?.phone || ''}</div>
+            ${personal?.address ? `<div>${personal.address}</div>` : ''}
+        </div>
     </div>
     
     ${personal?.summary ? `
@@ -105,8 +228,9 @@ const generateResumeHTML = (resumeData: any) => {
         <h2>Work Experience</h2>
         ${experience.map((exp: any) => `
         <div class="experience-item">
-            <h3>${exp.position || ''} at ${exp.company || ''}</h3>
-            <p><strong>${exp.startDate || ''} - ${exp.endDate || 'Present'}</strong></p>
+            <div class="job-title">${exp.position || ''}</div>
+            <div class="company">${exp.company || ''}</div>
+            <div class="date-range">${exp.startDate || ''} - ${exp.endDate || 'Present'}</div>
             <p>${exp.description || ''}</p>
         </div>
         `).join('')}
@@ -118,8 +242,9 @@ const generateResumeHTML = (resumeData: any) => {
         <h2>Education</h2>
         ${education.map((edu: any) => `
         <div class="education-item">
-            <h3>${edu.degree || ''} in ${edu.field || ''}</h3>
-            <p><strong>${edu.institution || ''}</strong> (${edu.graduationYear || ''})</p>
+            <div class="job-title">${edu.degree || ''} in ${edu.field || ''}</div>
+            <div class="company">${edu.institution || ''}</div>
+            <div class="date-range">${edu.graduationYear || ''}</div>
         </div>
         `).join('')}
     </div>
@@ -136,39 +261,4 @@ const generateResumeHTML = (resumeData: any) => {
 </body>
 </html>
   `;
-};
-
-const generateResumeText = (resumeData: any) => {
-  const { personal, experience = [], education = [], skills = [] } = resumeData;
-  
-  let text = `${personal?.firstName || ''} ${personal?.lastName || ''}\n`;
-  text += `${personal?.email || ''} | ${personal?.phone || ''}\n`;
-  text += `${personal?.address || ''}\n\n`;
-  
-  if (personal?.summary) {
-    text += `PROFESSIONAL SUMMARY\n${personal.summary}\n\n`;
-  }
-  
-  if (experience.length > 0) {
-    text += `WORK EXPERIENCE\n`;
-    experience.forEach((exp: any) => {
-      text += `${exp.position || ''} at ${exp.company || ''}\n`;
-      text += `${exp.startDate || ''} - ${exp.endDate || 'Present'}\n`;
-      text += `${exp.description || ''}\n\n`;
-    });
-  }
-  
-  if (education.length > 0) {
-    text += `EDUCATION\n`;
-    education.forEach((edu: any) => {
-      text += `${edu.degree || ''} in ${edu.field || ''}\n`;
-      text += `${edu.institution || ''} (${edu.graduationYear || ''})\n\n`;
-    });
-  }
-  
-  if (skills.length > 0) {
-    text += `SKILLS\n${skills.join(', ')}\n`;
-  }
-  
-  return text;
 };
