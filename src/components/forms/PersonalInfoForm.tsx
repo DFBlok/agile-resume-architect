@@ -1,11 +1,13 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, Mail, Phone, MapPin, Globe, Linkedin } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sparkles, Mail, Phone, MapPin, Globe, Linkedin, Loader2 } from "lucide-react";
+import { createClient } from '@/integrations/supabase/client';
+import { toast } from "sonner";
 
 interface PersonalInfoFormProps {
   data: any;
@@ -22,8 +24,13 @@ export const PersonalInfoForm = ({ data, onUpdate }: PersonalInfoFormProps) => {
     website: '',
     linkedin: '',
     summary: '',
+    role: '',
+    experience: '',
     ...data
   });
+
+  const [isGenerating, setIsGenerating] = useState(false);
+  const supabase = createClient();
 
   useEffect(() => {
     onUpdate(formData);
@@ -33,16 +40,77 @@ export const PersonalInfoForm = ({ data, onUpdate }: PersonalInfoFormProps) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const generateAISummary = () => {
-    // Mock AI generation - in real implementation, this would call OpenAI API
-    const sampleSummaries = [
-      "Experienced software engineer with 5+ years in full-stack development, specializing in React, Node.js, and cloud technologies. Proven track record of delivering scalable solutions and leading cross-functional teams.",
-      "Results-driven marketing professional with expertise in digital strategy, content creation, and data analysis. Successfully increased brand engagement by 150% and generated $2M+ in revenue through innovative campaigns.",
-      "Dedicated healthcare professional with 8+ years of experience in patient care and clinical operations. Strong background in emergency medicine with excellent communication and problem-solving skills."
-    ];
+  const roles = [
+    'Software Engineer',
+    'Frontend Developer',
+    'Backend Developer',
+    'Full Stack Developer',
+    'Data Scientist',
+    'Product Manager',
+    'UX/UI Designer',
+    'DevOps Engineer',
+    'Marketing Manager',
+    'Sales Representative',
+    'Business Analyst',
+    'Project Manager',
+    'Consultant',
+    'Teacher/Educator',
+    'Healthcare Professional',
+    'Financial Analyst',
+    'Human Resources',
+    'Customer Success Manager',
+    'Operations Manager',
+    'Other'
+  ];
+
+  const experiences = [
+    'Entry Level (0-1 years)',
+    'Junior Level (1-3 years)',
+    'Mid Level (3-5 years)',
+    'Senior Level (5-8 years)',
+    'Lead/Principal (8-12 years)',
+    'Executive Level (12+ years)'
+  ];
+
+  const generateAISummary = async () => {
+    if (!formData.role || !formData.experience) {
+      toast.error('Please select both role and experience level first');
+      return;
+    }
+
+    setIsGenerating(true);
     
-    const randomSummary = sampleSummaries[Math.floor(Math.random() * sampleSummaries.length)];
-    updateField('summary', randomSummary);
+    try {
+      const { data: result, error } = await supabase.functions.invoke('generate-ai-summary', {
+        body: {
+          role: formData.role,
+          experience: formData.experience,
+          personalInfo: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            location: formData.location
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Error generating AI summary:', error);
+        toast.error('Failed to generate AI summary. Please try again.');
+        return;
+      }
+
+      if (result?.summary) {
+        updateField('summary', result.summary);
+        toast.success('AI summary generated successfully!');
+      } else {
+        toast.error('No summary was generated. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error calling AI summary function:', error);
+      toast.error('Failed to generate AI summary. Please check your connection and try again.');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -57,20 +125,69 @@ export const PersonalInfoForm = ({ data, onUpdate }: PersonalInfoFormProps) => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            {/* Role and Experience Selection */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="role">Professional Role</Label>
+                <Select value={formData.role} onValueChange={(value) => updateField('role', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {role}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="experience">Experience Level</Label>
+                <Select value={formData.experience} onValueChange={(value) => updateField('experience', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select experience level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {experiences.map((exp) => (
+                      <SelectItem key={exp} value={exp}>
+                        {exp}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <Textarea
-              placeholder="Write a brief professional summary or let AI generate one for you..."
+              placeholder="Your professional summary will appear here, or write your own..."
               value={formData.summary}
               onChange={(e) => updateField('summary', e.target.value)}
               className="min-h-[120px]"
             />
             <Button 
               onClick={generateAISummary}
+              disabled={isGenerating || !formData.role || !formData.experience}
               variant="outline"
               className="border-blue-200 text-blue-700 hover:bg-blue-100"
             >
-              <Sparkles className="w-4 h-4 mr-2" />
-              Generate AI Summary
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Generating AI Summary...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Generate AI Summary
+                </>
+              )}
             </Button>
+            {(!formData.role || !formData.experience) && (
+              <p className="text-sm text-blue-600">
+                Select your role and experience level to generate a personalized AI summary
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
