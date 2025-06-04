@@ -27,7 +27,8 @@ export const ContactSection = () => {
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase
+      // Use any type to bypass TypeScript error until types are regenerated
+      const { error } = await (supabase as any)
         .from('contact_messages')
         .insert([
           {
