@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,6 +97,12 @@ export const PersonalInfoForm = ({ data, onUpdate }: PersonalInfoFormProps) => {
       if (error) {
         console.error('Error generating AI summary:', error);
         toast.error('Failed to generate AI summary. Please try again.');
+        return;
+      }
+
+      if (result?.error) {
+        console.error('AI summary error:', result.error);
+        toast.error(result.error);
         return;
       }
 
