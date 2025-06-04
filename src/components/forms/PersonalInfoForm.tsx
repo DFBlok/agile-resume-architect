@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sparkles, Mail, Phone, MapPin, Globe, Linkedin, Loader2 } from "lucide-react";
-import { createClient } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 
 interface PersonalInfoFormProps {
@@ -30,7 +31,6 @@ export const PersonalInfoForm = ({ data, onUpdate }: PersonalInfoFormProps) => {
   });
 
   const [isGenerating, setIsGenerating] = useState(false);
-  const supabase = createClient();
 
   useEffect(() => {
     onUpdate(formData);
