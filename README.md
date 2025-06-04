@@ -3,6 +3,7 @@
 ## Project info
 
 **URL**: https://lovable.dev/projects/97a5c72a-44de-4591-a754-dc8f9bd497ac
+
 **Live**: https://agile-resume-architect.vercel.app/
 
 ## How can I edit this code?
