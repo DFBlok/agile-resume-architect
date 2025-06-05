@@ -121,11 +121,19 @@ export const useResumeStorage = () => {
       }
 
       if (data) {
+        // Helper function to safely convert Json array to string array
+        const convertToStringArray = (jsonData: any): string[] => {
+          if (Array.isArray(jsonData)) {
+            return jsonData.filter((item): item is string => typeof item === 'string');
+          }
+          return [];
+        };
+
         return {
           personal: data.personal_info || {},
           experience: Array.isArray(data.experience) ? data.experience : [],
           education: Array.isArray(data.education) ? data.education : [],
-          skills: Array.isArray(data.skills) ? data.skills : []
+          skills: convertToStringArray(data.skills)
         };
       }
 
