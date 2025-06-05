@@ -123,9 +123,9 @@ export const useResumeStorage = () => {
       if (data) {
         return {
           personal: data.personal_info || {},
-          experience: data.experience || [],
-          education: data.education || [],
-          skills: data.skills || []
+          experience: Array.isArray(data.experience) ? data.experience : [],
+          education: Array.isArray(data.education) ? data.education : [],
+          skills: Array.isArray(data.skills) ? data.skills : []
         };
       }
 
