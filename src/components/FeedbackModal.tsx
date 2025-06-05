@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Star, ThumbsUp, ThumbsDown } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +27,8 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
     setIsSubmitting(true);
 
     try {
+      console.log('Submitting feedback:', { rating, satisfaction, feedback });
+      
       const { error } = await supabase
         .from('feedback')
         .insert({
@@ -36,9 +38,11 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
         });
 
       if (error) {
+        console.error('Feedback submission error:', error);
         throw error;
       }
 
+      console.log('Feedback submitted successfully');
       toast.success("Thank you for your feedback! It helps us improve our AI resume builder.");
       
       // Reset form
@@ -66,6 +70,9 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
       <DialogContent className="sm:max-w-md max-w-[90vw] mx-auto">
         <DialogHeader>
           <DialogTitle>How was your experience?</DialogTitle>
+          <DialogDescription>
+            Please share your feedback about the AI resume builder to help us improve.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-6 p-4">
           {/* Satisfaction */}
