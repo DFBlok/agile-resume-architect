@@ -57,6 +57,39 @@ export type Database = {
         }
         Relationships: []
       }
+      resumes: {
+        Row: {
+          created_at: string
+          education: Json | null
+          experience: Json | null
+          id: string
+          personal_info: Json | null
+          skills: Json | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          education?: Json | null
+          experience?: Json | null
+          id?: string
+          personal_info?: Json | null
+          skills?: Json | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          education?: Json | null
+          experience?: Json | null
+          id?: string
+          personal_info?: Json | null
+          skills?: Json | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

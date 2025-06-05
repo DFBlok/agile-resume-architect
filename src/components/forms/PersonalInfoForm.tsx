@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sparkles, Mail, Phone, MapPin, Globe, Linkedin, Loader2 } from "lucide-react";
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
+import { generateLocalAISummary } from '@/utils/aiSummaryGenerator';
 
 interface PersonalInfoFormProps {
   data: any;
@@ -82,39 +80,20 @@ export const PersonalInfoForm = ({ data, onUpdate }: PersonalInfoFormProps) => {
     setIsGenerating(true);
     
     try {
-      const { data: result, error } = await supabase.functions.invoke('generate-ai-summary', {
-        body: {
-          role: formData.role,
-          experience: formData.experience,
-          personalInfo: {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            location: formData.location
-          }
-        }
+      // Use local AI summary generator instead of API
+      const summary = generateLocalAISummary({
+        role: formData.role,
+        experience: formData.experience,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        location: formData.location
       });
 
-      if (error) {
-        console.error('Error generating AI summary:', error);
-        toast.error('Failed to generate AI summary. Please try again.');
-        return;
-      }
-
-      if (result?.error) {
-        console.error('AI summary error:', result.error);
-        toast.error(result.error);
-        return;
-      }
-
-      if (result?.summary) {
-        updateField('summary', result.summary);
-        toast.success('AI summary generated successfully!');
-      } else {
-        toast.error('No summary was generated. Please try again.');
-      }
+      updateField('summary', summary);
+      toast.success('Professional summary generated successfully!');
     } catch (error) {
-      console.error('Error calling AI summary function:', error);
-      toast.error('Failed to generate AI summary. Please check your connection and try again.');
+      console.error('Error generating summary:', error);
+      toast.error('Failed to generate summary. Please try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -181,18 +160,18 @@ export const PersonalInfoForm = ({ data, onUpdate }: PersonalInfoFormProps) => {
               {isGenerating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Generating AI Summary...
+                  Generating Summary...
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Generate AI Summary
+                  Generate Professional Summary
                 </>
               )}
             </Button>
             {(!formData.role || !formData.experience) && (
               <p className="text-sm text-blue-600">
-                Select your role and experience level to generate a personalized AI summary
+                Select your role and experience level to generate a personalized professional summary
               </p>
             )}
           </div>

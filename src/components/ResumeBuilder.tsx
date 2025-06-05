@@ -1,8 +1,8 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, FileText, Download, Eye } from "lucide-react";
+import { ArrowLeft, FileText, Download, Eye, Save } from "lucide-react";
 import { PersonalInfoForm } from './forms/PersonalInfoForm';
 import { ExperienceForm } from './forms/ExperienceForm';
 import { EducationForm } from './forms/EducationForm';
@@ -12,6 +12,8 @@ import { ATSScore } from './ATSScore';
 import { ExportOptions } from './ExportOptions';
 import { JobDescriptionAnalysis } from './JobDescriptionAnalysis';
 import { ThemeToggle } from './ThemeToggle';
+import { useResumeStorage } from '@/hooks/useResumeStorage';
+import { toast } from 'sonner';
 
 interface ResumeBuilderProps {
   onBack: () => void;
@@ -28,6 +30,20 @@ export const ResumeBuilder = ({ onBack, templateId = 'modern' }: ResumeBuilderPr
     skills: []
   });
 
+  const { saveResumeData, loadResumeData, isLoading } = useResumeStorage();
+
+  // Load existing resume data on component mount
+  useEffect(() => {
+    const loadExistingData = async () => {
+      const existingData = await loadResumeData();
+      if (existingData) {
+        setResumeData(existingData);
+        toast.success('Resume data loaded successfully!');
+      }
+    };
+    loadExistingData();
+  }, [loadResumeData]);
+
   const sections = [
     { id: 'personal', label: 'Personal Info', component: PersonalInfoForm },
     { id: 'experience', label: 'Experience', component: ExperienceForm },
@@ -42,6 +58,10 @@ export const ResumeBuilder = ({ onBack, templateId = 'modern' }: ResumeBuilderPr
       ...prev,
       [section]: data
     }));
+  };
+
+  const handleSaveResume = async () => {
+    await saveResumeData(resumeData);
   };
 
   const getTemplateName = (id: string) => {
@@ -85,6 +105,15 @@ export const ResumeBuilder = ({ onBack, templateId = 'modern' }: ResumeBuilderPr
               <ThemeToggle />
             </div>
             <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleSaveResume} 
+                disabled={isLoading}
+                className="flex-1 sm:flex-none"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isLoading ? 'Saving...' : 'Save'}
+              </Button>
               <Button variant="outline" onClick={() => setShowPreview(true)} className="flex-1 sm:flex-none">
                 <Eye className="w-4 h-4 mr-2" />
                 Preview
